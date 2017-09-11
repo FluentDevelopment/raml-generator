@@ -1,16 +1,8 @@
-import Promise = require('any-promise')
-import thenify = require('thenify')
-import { dirname, resolve } from 'path'
-import { loadApi } from 'raml-1-parser'
-import yargs = require('yargs')
-import mkdrp = require('mkdirp')
-import fs = require('fs')
-import parseJson = require('parse-json')
+import { dirname, resolve } from 'path';
+import { loadApi } from 'raml-1-parser';
+import { mkdirp, readFile, writeFile } from 'fs-extra';
+import * as yargs from 'yargs';
 import { Generator, Files, GeneratorResult } from './index'
-
-const mkdirp = thenify(mkdrp)
-const readFile = thenify<string, string, string>(fs.readFile)
-const writeFile = thenify<string, any, void>(fs.writeFile)
 
 /**
  * Simple `package.json` interface.
@@ -24,7 +16,7 @@ export interface Pkg {
 /**
  * Run the `bin` command for a consumer of the generator.
  */
-export function bin (generator: Generator, pkg: Pkg, argv: string[]): Promise<void> {
+export function bin(generator: Generator, pkg: Pkg, argv: string[]): Promise<void> {
   const cwd = process.cwd()
 
   interface Args {
@@ -44,7 +36,7 @@ export function bin (generator: Generator, pkg: Pkg, argv: string[]): Promise<vo
     .array('include')
     .alias('i', 'include')
     .describe('i', 'Include additional RAML files (E.g. extensions)')
-    .parse<Args>(argv)
+    .parse(argv)
 
   return loadApi(args._[2], args.include || [], { rejectOnErrors: true })
     .then(function (api: any) {
@@ -57,7 +49,7 @@ export function bin (generator: Generator, pkg: Pkg, argv: string[]): Promise<vo
       const path = resolve(cwd, args.data)
 
       return readFile(path, 'utf8')
-        .then(contents => parseJson(contents, null, path))
+        .then(contents => JSON.parse(contents))
         .then(data => generator(json, data))
     })
     .then(function (output: GeneratorResult) {
@@ -81,7 +73,7 @@ export function bin (generator: Generator, pkg: Pkg, argv: string[]): Promise<vo
 /**
  * Save on object structure to the file system.
  */
-function objectToFs (path: string, object: Files) {
+function objectToFs(path: string, object: Files) {
   return Object.keys(object).reduce(
     function (promise, file) {
       const content = object[file]

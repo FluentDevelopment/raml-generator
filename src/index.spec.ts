@@ -1,7 +1,7 @@
-import test = require('blue-tape')
-import { generator } from './index'
-import {join}  from 'path'
-import parser = require('raml-1-parser')
+import * as test from 'blue-tape';
+import { generator } from './index';
+import { join } from 'path';
+import * as parser from 'raml-1-parser';
 
 test('raml generator', t => {
   t.test('basic generator', t => {
