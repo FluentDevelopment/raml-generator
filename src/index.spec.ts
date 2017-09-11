@@ -30,7 +30,7 @@ test('raml generator', t => {
     });
 
     parser.loadApi(musicRaml).then(
-      function(api: any) {
+      function (api: any) {
         const json = api.expand(true).toJSON();
         t.deepEqual(generate(json).files, { 'test.js': 'success: World Music API' });
 
